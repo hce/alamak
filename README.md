@@ -11,6 +11,18 @@ It loads that URL and everything else you can do in JavaScript. The
 URL is reloaded once per hour unless the display is used, in which
 case the reload will be postponed to 60 seconds after the last touch.
 
+You may query the target device's unique id from Javascript by writing a
+function as such:
+
+<pre>
+function getDeviceId() {
+    if (typeof alamakNative !== "undefined") {
+        return alamakNative.getDeviceId();
+    }
+    return "virtual";
+}
+</pre>
+
 Example usage:
 
 ![Example 1](doc/img/ex1.jpeg)
