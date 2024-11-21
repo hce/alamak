@@ -15,13 +15,15 @@ You may query the target device's unique id from Javascript by writing a
 function as such:
 
 <pre>
-function getDeviceId() {
-    if (typeof alamakNative !== "undefined") {
-        return alamakNative.getDeviceId();
-    }
-    return "virtual";
-}
+return alamakNative.getDeviceId();
 </pre>
+
+There is a small .js file called alamakNativeStub.js provided for in browser testing.
+
+The other API functions are still in develeopment, there is an API function to
+store/get state across JS reloads. But it only works with long values right
+now, need to investigate how to store/load arbitrary JS objects. Also, there is
+an API to set/query the relay state, but that's device specific for now.
 
 Example usage:
 
