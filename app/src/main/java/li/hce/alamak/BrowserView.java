@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
@@ -25,12 +26,6 @@ import li.hce.alamak.databinding.ActivityBrowserViewBinding;
  * status bar and navigation/system bar) with user interaction.
  */
 public class BrowserView extends Activity {
-    private static final long UPDATE_INTERVAL = 3600000L;
-
-    private static final long WAIT_UNTIL_TOUCH = 60000L;
-
-    private static final String URL_TO_DISPLAY = "http://192.168.7.8/walldisplay/";
-
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -158,26 +153,34 @@ public class BrowserView extends Activity {
         binding.webViewHor.getSettings().setDomStorageEnabled(true);
         binding.webViewHor.getSettings().setAllowFileAccessFromFileURLs(true);
         binding.webViewHor.getSettings().setAllowContentAccess(true);
+        binding.webViewHor.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
 
         final String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        final PerDeviceSettings.DeviceSettings deviceSettings = PerDeviceSettings.get(deviceId);
+        Log.i("li.hce.alamak", "Using device settigns for device " + deviceSettings.getDeviceName());
         final JSIntf jsintf = new JSIntf(deviceId);
         binding.webViewHor.addJavascriptInterface(jsintf, "alamakNative");
 
         binding.webViewHor.clearCache(true);
-        binding.webViewHor.loadUrl(URL_TO_DISPLAY);
+        binding.webViewHor.loadUrl(deviceSettings.getUrlToDisplay());
 
         t.schedule(new TimerTask() {
             @Override
             public void run() {
                 final long update = System.currentTimeMillis() - lastUpdate;
-                if (update > UPDATE_INTERVAL ){
+                if (update > deviceSettings.getUpdateInterval()) {
                     final long touch = System.currentTimeMillis() - lastTouch;
-                    if (touch > WAIT_UNTIL_TOUCH) {
+                    if (touch > deviceSettings.getWaitUntilTouch()) {
                         lastUpdate = System.currentTimeMillis();
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                binding.webViewHor.loadUrl(URL_TO_DISPLAY);
+                                binding.webViewHor.loadUrl(deviceSettings.getUrlToDisplay());
                                 binding.webViewHor.clearCache(true);
                                 binding.webViewHor.reload();
                             }
